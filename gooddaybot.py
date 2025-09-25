@@ -5,6 +5,7 @@ import asyncio
 import os
 from datetime import time
 from datetime import datetime, timedelta
+import pytz
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -36,20 +37,17 @@ def save_results(results):
 
 
 # --- Daily poll task ---
-@tasks.loop(hours=24)
+@tasks.loop(time=time(18, 0, tzinfo=POLAND_TZ))
 async def daily_poll():
-    now = datetime.now()
-    target = now.replace(hour=18, minute=0, second=0, microsecond=0)
-    if now > target:
-        target += timedelta(days=1)
-    await asyncio.sleep((target - now).total_seconds())
-
     channel = bot.get_channel(POLL_CHANNEL_ID)
     if not channel:
         return
 
     # Send poll message
     msg = await channel.send(f"📊 {POLL_QUESTION}")
+    # Send role ping immediately after (separate message as you wanted)
+    role_ping = await channel.send(f"<@&{1415758700685033584}>")
+    
     for emoji in POLL_OPTIONS:
         await msg.add_reaction(emoji)
 
@@ -63,7 +61,7 @@ async def daily_poll():
     votes = {emoji: 0 for emoji in POLL_OPTIONS}
     for reaction in msg.reactions:
         if reaction.emoji in POLL_OPTIONS:
-            votes[reaction.emoji] = reaction.count - 1  # exclude bot’s own reaction
+            votes[reaction.emoji] = reaction.count - 1  # exclude bot's own reaction
 
     # Find winner
     winner = max(votes, key=votes.get)

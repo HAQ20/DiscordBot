@@ -2,16 +2,6 @@
 
 A Discord bot that runs daily polls and tracks results over time. The bot asks a daily question and keeps track of voting results in a leaderboard.
 
-## Features
-
-- Daily automated polls at 6 PM
-- Tracks voting results over time
-- Leaderboard display
-- Custom commands for checking results
-- Larry meme commands for fun
-
-## Setup
-
 ### Prerequisites
 
 - Python 3.7 or higher
