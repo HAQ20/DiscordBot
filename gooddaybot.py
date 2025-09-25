@@ -22,6 +22,8 @@ POLL_QUESTION = "Czy dzisiejszy dzień był chujowy?" # Poll question
 
 DATA_FILE = "poll_results.json"
 
+#Bot timezone
+TIMEZONE = pytz.timezone('Europe/Warsaw')
 
 # --- Load/save data ---
 def load_results():
@@ -37,7 +39,7 @@ def save_results(results):
 
 
 # --- Daily poll task ---
-@tasks.loop(time=time(18, 0, tzinfo=POLAND_TZ))
+@tasks.loop(time=time(18, 0, tzinfo=TIMEZONE))
 async def daily_poll():
     channel = bot.get_channel(POLL_CHANNEL_ID)
     if not channel:
