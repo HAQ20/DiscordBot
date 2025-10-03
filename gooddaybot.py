@@ -37,6 +37,23 @@ def save_results(results):
     with open(DATA_FILE, "w") as f:
         json.dump(results, f)
 
+# Add to load/save functions
+def load_poll_state():
+    try:
+        with open("current_poll.json", "r") as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return None
+
+def save_poll_state(message_id, end_time):
+    with open("current_poll.json", "w") as f:
+        json.dump({"message_id": message_id, "end_time": end_time.isoformat()}, f)
+
+def clear_poll_state():
+    try:
+        os.remove("current_poll.json")
+    except FileNotFoundError:
+        pass
 
 # --- Daily poll task ---
 @tasks.loop(hours=24)
