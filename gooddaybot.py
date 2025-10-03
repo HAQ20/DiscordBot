@@ -39,8 +39,21 @@ def save_results(results):
 
 
 # --- Daily poll task ---
-@tasks.loop(time=time(18, 0, tzinfo=TIMEZONE))
+@tasks.loop(hours=24)
 async def daily_poll():
+    # Calculate next 18:00 in Warsaw timezone
+    now = datetime.now(TIMEZONE)
+    target = now.replace(hour=18, minute=0, second=0, microsecond=0)
+    
+    # If it's already past 18:00 today, schedule for tomorrow
+    if now >= target:
+        target += timedelta(days=1)
+    
+    # Wait until the target time
+    wait_seconds = (target - now).total_seconds()
+    if wait_seconds > 0:
+        await asyncio.sleep(wait_seconds)
+
     channel = bot.get_channel(POLL_CHANNEL_ID)
     if not channel:
         return
