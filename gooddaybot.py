@@ -31,7 +31,7 @@ def load_results():
         with open(DATA_FILE, "r") as f:
             return json.load(f)
     except FileNotFoundError:
-        return {emoji: 0 for emoji in POLL_OPTIONS}
+        return {"✅": 0, "❌": 0, "tie": 0}
 
 def save_results(results):
     with open(DATA_FILE, "w") as f:
@@ -66,7 +66,10 @@ async def daily_poll():
             votes[reaction.emoji] = reaction.count - 1  # exclude bot's own reaction
 
     # Find winner
-    winner = max(votes, key=votes.get)
+    if votes["✅"] == votes["❌"]:
+        winner = "tie"
+    else:
+        winner = max(votes, key=votes.get)
 
     # Save cumulative results
     results = load_results()
@@ -74,11 +77,12 @@ async def daily_poll():
     save_results(results)
 
     # Announce
-    labels = {"✅": "chujowe dni", "❌": "dobre dni"}
+    labels = {"✅": "chujowe dni", "❌": "dobre dni", "tie": "remis"}
     leaderboard = "\n".join(f"{labels.get(emoji, emoji)}: {count}" for emoji, count in results.items())
     winner_messages = {
         "✅": "Dziś był chujowy dzień!",
-        "❌": "Dziś był dobry dzień!"
+        "❌": "Dziś był dobry dzień!",
+        "tie": "Dziś był średni dzień"
     }
     winner_message = winner_messages.get(winner, f"Wynik: {winner}")
     await channel.send(f"{winner_message}\n\n🏆 Leaderboard:\n{leaderboard}")
@@ -90,17 +94,19 @@ async def larry(ctx):
 @bot.command()
 async def larry_gif(ctx):
     await ctx.send("https://tenor.com/view/larry-larry-cat-chat-larry-meme-chat-meme-cat-gif-10061556685042597078")
+
 @bot.command()
 async def larry_check(ctx):
     results = load_results()
-    labels = {"✅": "chujowe dni", "❌": "dobre dni"}
+    labels = {"✅": "chujowe dni", "❌": "dobre dni", "tie": "remis"}
     leaderboard = "\n".join(f"{labels.get(emoji, emoji)}: {count}" for emoji, count in results.items())
     # Determine winner based on current results
     if results:
         winner = max(results, key=results.get)
         winner_messages = {
             "✅": "Dziś był chujowy dzień!",
-            "❌": "Dziś był dobry dzień!"
+            "❌": "Dziś był dobry dzień!",
+            "tie": "Dziś był średni dzień"
         }
         winner_message = winner_messages.get(winner, f"Wynik: {winner}")
     else:
